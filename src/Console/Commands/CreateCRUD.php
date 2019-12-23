@@ -132,7 +132,10 @@ class CreateCRUD extends Command
                     exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
                     exec("cp vendor/javimanga/createcrud/src/TableComponent.vue resources/js/components/TableComponent.vue");
                     exec("cp vendor/javimanga/createcrud/src/helpers.js resources/js/helpers.js");
-                    exec("cp vendor/javimanga/createcrud/src/template.blade.php resources/views/template.blade.php");
+                    if (!file_exists("resources/views/{$camelCaseTable}")) {
+                        mkdir("resources/views/{$camelCaseTable}", 0755, true);
+                    }
+                    exec("cp vendor/javimanga/createcrud/src/template.blade.php resources/views/{$camelCaseTable}/template.blade.php");
                     $contents = file_get_contents('routes/web.php');
                     $pattern = preg_quote("Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller');", '/');
                     $pattern = "/^.*$pattern.*\$/m";
@@ -145,6 +148,7 @@ class CreateCRUD extends Command
                     if (!preg_match_all($pattern, $contents, $matches)) {
                         exec('npm install --save vue-select');
                         $appImport[] = "import vSelect from 'vue-select'";
+                        $appImport[] = "import 'vue-select/dist/vue-select.css';'";
                         $appComponent[] = "Vue.component('v-select', vSelect);";
                     }
                     $contents = file_get_contents('resources/js/app.js');

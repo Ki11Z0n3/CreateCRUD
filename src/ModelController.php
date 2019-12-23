@@ -34,6 +34,6 @@ class :ModelController extends Controller
             'filter_type' => 'DESC',
             'new' => false
         ];
-        return view('template')->with(compact('model'));
+        return view(':Model.template')->with(compact('model'));
     }
 }
