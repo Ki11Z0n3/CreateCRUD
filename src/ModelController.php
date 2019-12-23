@@ -12,6 +12,7 @@ class :ModelController extends Controller
     {
         $filters = $this->validate(request(), [
            'id' => 'sometimes|string',
+//           'year' => 'sometimes|number',
         ]);
 
         $:Model = :Model::with([]);
@@ -30,8 +31,8 @@ class :ModelController extends Controller
             'model' => ':Model',
             'relations' => (Object)[],
             'data' => $:Model->paginate(10),
-            'filter_column' => '',
-            'filter_type' => 'DESC',
+            'filter_column' => '', // id
+            'filter_type' => '', // DESC || ASC
             'new' => false
         ];
         return view(':Model.template')->with(compact('model'));
