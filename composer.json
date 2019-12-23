@@ -1,0 +1,20 @@
+{
+  "name": "javimanga/createcrud",
+  "version": "1.0.0",
+  "description": "-",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Javier Manga",
+      "email": "javimanga93@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.2",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {"JaviManga\\CreateCrud\\": "src/"}
+  }
+}
