@@ -144,6 +144,12 @@ class CreateCRUD extends Command
                     } else {
                         exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
                     }
+                    if (!file_exists("app/Http/Traits")) {
+                        mkdir("app/Http/Traits", 0755, true);
+                    }
+                    if (!file_exists("app/Http/Traits/Filterable.php")) {
+                        exec("cp vendor/javimanga/createcrud/src/Http/Traits/Filterable.php app/Http/Traits/Filterable.php");
+                    }
                     if (!file_exists("resources/js/components/default")) {
                         mkdir("resources/js/components/default", 0755, true);
                     }
