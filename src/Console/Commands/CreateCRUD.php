@@ -128,10 +128,34 @@ class CreateCRUD extends Command
                     $appImport = [];
                     $appUse = [];
                     $appComponent = [];
-                    exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/Model.php > app/{$camelCaseTable}.php");
-                    exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
-                    exec("cp vendor/javimanga/createcrud/src/TableComponent.vue resources/js/components/TableComponent.vue");
-                    exec("cp vendor/javimanga/createcrud/src/helpers.js resources/js/helpers.js");
+                    if (file_exists("app/{$camelCaseTable}.php")) {
+                        $copy = $this->anticipate("Ya existe el modelo {$camelCaseTable}.php, ¿desea sobreescribirlo? Si (recomendado) / No", ['si', 'no'], 'si');
+                        if (mb_strtolower($copy) == 'si') {
+                            exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/Model.php > app/{$camelCaseTable}.php");
+                        }
+                    } else {
+                        exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/Model.php > app/{$camelCaseTable}.php");
+                    }
+                    if (file_exists("app/Http/Controllers/{$camelCaseTable}Controller.php")) {
+                        $copy = $this->anticipate("Ya existe el controlador {$camelCaseTable}Controller.php, ¿desea sobreescribirlo? Si (recomendado) / No", ['si', 'no'], 'si');
+                        if (mb_strtolower($copy) == 'si') {
+                            exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
+                        }
+                    } else {
+                        exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
+                    }
+                    if (!file_exists("resources/js/components/default")) {
+                        mkdir("resources/js/components/default", 0755, true);
+                    }
+                    if (!file_exists("resources/js/components/default/TableComponent.vue")) {
+                        exec("cp vendor/javimanga/createcrud/src/TableComponent.vue resources/js/components/default/TableComponent.vue");
+                    }
+                    if (!file_exists("resources/js/components/default/ModalComponent.vue")) {
+                        exec("cp vendor/javimanga/createcrud/src/ModalComponent.vue resources/js/components/default/ModalComponent.vue");
+                    }
+                    if (!file_exists("resources/js/helpers.js")) {
+                        exec("cp vendor/javimanga/createcrud/src/helpers.js resources/js/helpers.js");
+                    }
                     if (!file_exists("resources/views/{$camelCaseTable}")) {
                         mkdir("resources/views/{$camelCaseTable}", 0755, true);
                     }
@@ -143,15 +167,6 @@ class CreateCRUD extends Command
                         exec("echo Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller'); >> routes/web.php");
                     }
                     $contents = file_get_contents('resources/js/app.js');
-                    $pattern = preg_quote("Vue.component('v-select', vSelect);", '/');
-                    $pattern = "/^.*$pattern.*\$/m";
-                    if (!preg_match_all($pattern, $contents, $matches)) {
-                        exec('npm install --save vue-select');
-                        $appImport[] = "import vSelect from 'vue-select'";
-                        $appImport[] = "import 'vue-select/dist/vue-select.css';'";
-                        $appComponent[] = "Vue.component('v-select', vSelect);";
-                    }
-                    $contents = file_get_contents('resources/js/app.js');
                     $pattern = preg_quote("import VueSweetalert2 from 'vue-sweetalert2';", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
@@ -161,10 +176,16 @@ class CreateCRUD extends Command
                         $appUse[] = "Vue.use(VueSweetalert2);";
                     }
                     $contents = file_get_contents('resources/js/app.js');
-                    $pattern = preg_quote("Vue.component('table-component', require('./components/TableComponent.vue').default);", '/');
+                    $pattern = preg_quote("Vue.component('table-component', require('./components/default/TableComponent.vue').default);", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
-                        $appComponent[] = "Vue.component('table-component', require('./components/TableComponent.vue').default);";
+                        $appComponent[] = "Vue.component('table-component', require('./components/default/TableComponent.vue').default);";
+                    }
+                    $contents = file_get_contents('resources/js/app.js');
+                    $pattern = preg_quote("Vue.component('modal-component', require('./components/default/ModalComponent.vue').default);", '/');
+                    $pattern = "/^.*$pattern.*\$/m";
+                    if (!preg_match_all($pattern, $contents, $matches)) {
+                        $appComponent[] = "Vue.component('modal-component', require('./components/default/ModalComponent.vue').default);";
                     }
                     if (count($appImport) != 0 || count($appUse) != 0 || count($appComponent) != 0) {
                         $this->info('Añada las siguientes lineas a resources/js/app.js');
@@ -187,7 +208,8 @@ class CreateCRUD extends Command
                     } else {
                         exec('npm run dev');
                     }
-                    $this->info(route($camelCaseTable . '.index'));
+                    Artisan::call('config:cache');
+                    $this->info(url(route($camelCaseTable . '.index')));
                 } else {
                     $this->error('Error: la tabla ' . $table . ' no existe');
                 }

@@ -24,17 +24,18 @@
                                        class="fas fa-sort-up pointer order"></i>
                                 </span>
                         <span v-if="index != data.tableBuilder.length - 1 && !field.filter">{{field.label}} <i
-                                v-if="field.order"
-                                :id="field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order"
-                                @click="orderColumn(field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order)"
-                                class="fas fa-sort-up pointer order"></i></span>
+                            v-if="field.order"
+                            :id="field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order"
+                            @click="orderColumn(field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order)"
+                            class="fas fa-sort-up pointer order"></i></span>
                     </th>
-                    <th v-if="field.field == 'actions' && Object.getOwnPropertyNames(field.items).length > 1">
+                    <th v-if="field.field == 'actions' && Object.getOwnPropertyNames(field.items).length > 1 && field.items[0].type == 'new'">
                         <center v-if="index == data.tableBuilder.length - 1 && !field.filter">
-                            <button class="btn btn-primary">Nuevo</button>
+                            <button class="btn btn-primary" @click="newData">Nuevo</button>
                         </center>
                     </th>
                 </template>
+                <th v-if="data.tableBuilder[Object.keys(data.tableBuilder).length-1].items[0] && data.tableBuilder[Object.keys(data.tableBuilder).length-1].items[0].type != 'new'"></th>
             </tr>
             </thead>
             <tbody>
@@ -60,8 +61,10 @@
                                 <span v-else>NO</span>
                             </span>
                         <span v-if="field.type == 'url'">
-                            <span v-if="field.urlLabel"><a :style="{color:`${field.color ? field.color : ''}`}" target="_blank" :href="'http://' + row[field.field]">{{field.urlLabel}}</a></span>
-                            <span v-else><a :style="{color:`${field.color ? field.color : ''}`}" target="_blank" :href="'http://' + row[field.field]">{{row[field.field]}}</a></span>
+                            <span v-if="field.urlLabel"><a :style="{color:`${field.color ? field.color : ''}`}"
+                                                           target="_blank" :href="'http://' + row[field.field]">{{field.urlLabel}}</a></span>
+                            <span v-else><a :style="{color:`${field.color ? field.color : ''}`}" target="_blank"
+                                            :href="'http://' + row[field.field]">{{row[field.field]}}</a></span>
                         </span>
                         <span v-if="field.type == null">{{row[field.field]}}</span>
                     </td>
@@ -73,15 +76,15 @@
                                             <span data-toggle="tooltip" data-placement="top" title="Ver"
                                                   v-if="item.type == 'show'"
                                                   @click="viewData(row)"><i
-                                                    class="fas fa-eye mr-2 pointer text-success"></i></span>
+                                                class="fas fa-eye mr-2 pointer text-success"></i></span>
                                             <span data-toggle="tooltip" data-placement="top" title="Editar"
                                                   v-if="item.type == 'edit'"
                                                   @click="editData(row)"><i
-                                                    class="fas fa-edit mr-2 pointer text-warning"></i></span>
+                                                class="fas fa-edit mr-2 pointer text-warning"></i></span>
                                             <span data-toggle="tooltip" data-placement="top" title="Eliminar"
                                                   v-if="item.type == 'delete'"
                                                   @click="deleteData(row)"><i
-                                                    class="fas fa-trash-alt pointer text-danger"></i></span>
+                                                class="fas fa-trash-alt pointer text-danger"></i></span>
                                         </span>
                                     </center>
                                 </span>
@@ -110,11 +113,24 @@
                 </button>
             </div>
         </div>
+
+
+        <div v-if="showModal">
+            <transition name="modal">
+                <div class="modal-mask">
+                    <div class="modal-wrapper">
+                        <div class="modal-dialog" role="document">
+                            <modal-component :model="dataEdit" :formModel="formEdit" @showHiddeModal="showModal = !showModal" @saveChanges="saveData"></modal-component>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>
 
 <script>
-    import {catchErrors, handleErrors, successHandler, clean} from '../helpers';
+    import {catchErrors, handleErrors, successHandler, clean} from '../../helpers';
 
     export default {
         props: ["model", "options"],
@@ -133,23 +149,57 @@
                 ],
                 searchValues: [],
                 listSelected: {value: '10', label: '10'},
+                showModal: false,
+                componentModel: '',
+                dataEdit: '',
+                formEdit: '',
+                action: ''
             };
         },
         created() {
             this.data = JSON.parse(this["model"]);
-            if(this.data.filter_column && this.data.filter_type){
+            if (this.data.filter_column && this.data.filter_type) {
                 this.order = this.data.filter_type;
                 this.column = this.data.filter_column;
                 this.searchField();
-                console.log('test');
             }
+            // this.$options.components['ComponentModel'] = () => import(`../ModalComponent.vue`);
         },
         mounted() {
             $('.search').each(function () {
-                this.style.width = this.placeholder.length + "ch";
-            })
+                this.style.width = this.placeholder.length + 3 + "ch";
+            });
         },
         methods: {
+            saveData(data) {
+                console.log(data);
+                let url, method;
+                this.showModal = !this.showModal;
+                if(this.action != '' && this.action == 'update'){
+                    url = route(this.data.prefix + '.update', data.id);
+                    method = 'PUT';
+                }else if(this.action != '' && this.action == 'store'){
+                    url = route(this.data.prefix + '.store');
+                    method = 'POST';
+                }else{
+                    return false;
+                }
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(response => catchErrors(response))
+                    .then(data => {
+                        this.action = '';
+                        this.dataEdit = '';
+                        this.data.data = data.data;
+                        successHandler(data)
+                    })
+                    .catch(error => handleErrors(error));
+            },
             removeSearchField(select = null) {
                 if (select) {
                     this.searchValues.splice(this.searchValues.indexOf(select), 1);
@@ -168,21 +218,21 @@
                 $('.search').each(function () {
                     if (this.value != '') {
                         count++;
-                        if(search.find(value => value.match(new RegExp( $(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined){
-                            search.splice(search.indexOf(search.find(value => value.match(new RegExp( $(this).attr('id').split('-')[1] + '=', 'i')) !== null)), 1);
+                        if (search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined) {
+                            search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null)), 1);
                             search.push($(this).attr('id').split('-')[1] + '=' + this.value);
-                        }else{
+                        } else {
                             search.push($(this).attr('id').split('-')[1] + '=' + this.value);
                         }
-                    }else{
-                        if(search.find(value => value.match(new RegExp( $(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined) {
+                    } else {
+                        if (search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined) {
                             search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null)), 1);
                         }
                     }
                 });
-                if(count == 0 && this.searchValues.length == 0){
+                if (count == 0 && this.searchValues.length == 0) {
                     this.searchValues = [];
-                }else{
+                } else {
                     this.searchValues = search;
                 }
                 if (select && !select.value) {
@@ -240,15 +290,27 @@
             }
             ,
             newData() {
-                location.href = route(this.data.prefix + '.create');
+                // location.href = route(this.data.prefix + '.create');
+                this.action = 'store';
+                this.showModal = true;
+                this.dataEdit = [];
+                this.formEdit = this.data.formEdit;
             }
             ,
             viewData(row) {
-                location.href = route(this.data.prefix + '.show', row.id);
+                // location.href = route(this.data.prefix + '.show', row.id);
+                this.action = 'show';
+                this.showModal = true;
+                this.dataEdit = row;
+                this.formEdit = this.data.formEdit;
             }
             ,
             editData(row) {
-                location.href = route(this.data.prefix + '.edit', row.id);
+                // location.href = route(this.data.prefix + '.edit', row.id);
+                this.action = 'update';
+                this.showModal = true;
+                this.dataEdit = row;
+                this.formEdit = this.data.formEdit;
             }
             ,
             deleteData(row) {
@@ -296,5 +358,22 @@
     .search::placeholder {
         color: #858796;
         font-weight: bold;
+    }
+
+    .modal-mask {
+        position: fixed;
+        z-index: 9998;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .5);
+        display: table;
+        transition: opacity .3s ease;
+    }
+
+    .modal-wrapper {
+        display: table-cell;
+        vertical-align: middle;
     }
 </style>

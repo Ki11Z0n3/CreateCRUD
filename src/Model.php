@@ -12,34 +12,30 @@ class :Model extends Model
 {
     use Filterable;
 
-    protected
-    $guarded = [];
-    protected
-    $appends = [];
+    protected $guarded = [];
+    protected $appends = [];
 
-    protected
-    $filterable = [
+    protected $filterable = [
         'id',
-        //// EXAMPLE ////
-//        'year'
-        //// EXAMPLE ////
     ];
 
-    public
-    function scopeId($query, $text)
+    public function scopeId($query, $text)
     {
         return $query->where('id', 'LIKE', '%' . $text . '%');
     }
 
-    //// EXAMPLE ////
-//    public function scopeYear($query, $text)
-//    {
-//        return $query->where('year', 'LIKE', '%' . $text . '%');
-//    }
-    //// EXAMPLE ////
+    public static function formEdit()
+    {
+        return [
+            (Object)[
+                'field' => 'name',
+                'label' => 'Nombre',
+                'type' => 'text'
+            ],
+        ];
+    }
 
-    public
-    static function tableBuilder()
+    public static function tableBuilder()
     {
         return [
             (Object)[
@@ -49,43 +45,23 @@ class :Model extends Model
                 'filter_type' => 'text',
                 'order' => 'id'
             ],
-            //// EXAMPLES ////
-//            (Object)[
-//                'field' => 'image',
-//                'label' => 'Image',
-//                'filter' => false, // false || true
-//                'filter_type' => 'text',
-//                'order' => '' // year || empty
-//                'urlLabel' => 'Link to image', // Comment to disabled
-//                'color' => 'red', // Comment to disabled
-//                'backgroundColor' => 'black', // Comment to disabled
-//                'type' => 'url', // Comment to disabled
-//            ],
-//            (Object)[
-//                'field' => 'device',
-//                'label' => 'Dispositivo',
-//                'filter' => true,
-//                'filter_type' => 'select',
-//                'filter_items' => collect(DB::select('select device from visitors group by device'))->map(function($value){
-//                    return (Object)['label' => $value->device, 'value' => $value->device];
-//                }),
-//                'order' => 'device'
-//            ],
-            //// EXAMPLES ////
             (Object)[
                 'field' => 'actions',
                 'label' => '',
                 'type' => 'actions',
                 'items' => (Object)[
+                    (Object)[
+                        'type' => 'new'
+                    ],
 //                    (Object)[
 //                        'type' => 'show'
 //                    ],
-//                    (Object)[
-//                        'type' => 'edit'
-//                    ],
-//                    (Object)[
-//                        'type' => 'delete'
-//                    ],
+                    (Object)[
+                        'type' => 'edit'
+                    ],
+                    (Object)[
+                        'type' => 'delete'
+                    ],
                 ]
             ],
         ];
