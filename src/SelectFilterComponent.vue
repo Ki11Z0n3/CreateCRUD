@@ -36,11 +36,11 @@
             select(option){
                 this.selected = option.label;
                 this.selectedValue = option.value;
-                this.$emit('change', this.field.field + '=' + option.value);
+                this.$emit('change', this.field.filter_scope + '=' + option.value);
             },
             removeFilter(){
                 this.selected = '';
-                this.$emit('changeRemoveAll', this.field.field + '=' + this.selectedValue);
+                this.$emit('changeRemoveAll', this.field.filter_scope + '=' + this.selectedValue);
                 this.selectedValue = '';
             },
             toggle() {

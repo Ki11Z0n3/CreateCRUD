@@ -28,7 +28,7 @@
         </div>
         <div class="card-body">
             @if (isset($model) && $model)
-                <{{$model->component}} model="{{json_encode($model)}}" />
+                <table-component model="{{json_encode($model)}}" />
             @endif
         </div>
     </div>

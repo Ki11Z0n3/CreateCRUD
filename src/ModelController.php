@@ -40,9 +40,9 @@ class :ModelController extends Controller
     public function showAll($paginate = false)
     {
         if(!$paginate){
-            return :Model::with(:Model::$relations);
+            return :Model::with(self::$relations);
         }else {
-            return :Model::with(:Model::$relations)->paginate(10);
+            return :Model::with(self::$relations)->paginate(10);
         }
     }
 

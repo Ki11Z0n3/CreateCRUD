@@ -16,6 +16,7 @@
                                     <template v-if="field.filter_type == 'text'">
                                         <input class="search" type="text" :placeholder="field.label"
                                                :id="'search-'+field.field + (field.hasManyField ? '*' + field.hasManyField : field.belongToField ? '*' + field.belongToField : '')"
+                                               :scope="'search-'+field.filter_scope + (field.hasManyField ? '*' + field.hasManyField : field.belongToField ? '*' + field.belongToField : '')"
                                                @keyup="searchField()"/>
                                     </template>
                                     <i v-if="field.order"
@@ -24,10 +25,10 @@
                                        class="fas fa-sort-up pointer order"></i>
                                 </span>
                         <span v-if="index != data.tableBuilder.length - 1 && !field.filter">{{field.label}} <i
-                            v-if="field.order"
-                            :id="field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order"
-                            @click="orderColumn(field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order)"
-                            class="fas fa-sort-up pointer order"></i></span>
+                                v-if="field.order"
+                                :id="field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order"
+                                @click="orderColumn(field.belongToField ? 'order_' + field.order + '_' + field.belongToField : field.hasManyField ? 'order_' + field.order + '_' + field.hasManyField : 'order_' + field.order)"
+                                class="fas fa-sort-up pointer order"></i></span>
                     </th>
                     <th v-if="field.field == 'actions' && Object.getOwnPropertyNames(field.items).length > 1 && field.items[0].type == 'new'">
                         <center v-if="index == data.tableBuilder.length - 1 && !field.filter">
@@ -76,15 +77,15 @@
                                             <span data-toggle="tooltip" data-placement="top" title="Ver"
                                                   v-if="item.type == 'show'"
                                                   @click="viewData(row)"><i
-                                                class="fas fa-eye mr-2 pointer text-success"></i></span>
+                                                    class="fas fa-eye mr-2 pointer text-success"></i></span>
                                             <span data-toggle="tooltip" data-placement="top" title="Editar"
                                                   v-if="item.type == 'edit'"
                                                   @click="editData(row)"><i
-                                                class="fas fa-edit mr-2 pointer text-warning"></i></span>
+                                                    class="fas fa-edit mr-2 pointer text-warning"></i></span>
                                             <span data-toggle="tooltip" data-placement="top" title="Eliminar"
                                                   v-if="item.type == 'delete'"
                                                   @click="deleteData(row)"><i
-                                                class="fas fa-trash-alt pointer text-danger"></i></span>
+                                                    class="fas fa-trash-alt pointer text-danger"></i></span>
                                         </span>
                                     </center>
                                 </span>
@@ -218,15 +219,15 @@
                 $('.search').each(function () {
                     if (this.value != '') {
                         count++;
-                        if (search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined) {
-                            search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null)), 1);
-                            search.push($(this).attr('id').split('-')[1] + '=' + this.value);
+                        if (search.find(value => value.match(new RegExp($(this).attr('scope').split('-')[1] + '=', 'i')) !== null) !== undefined) {
+                            search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('scope').split('-')[1] + '=', 'i')) !== null)), 1);
+                            search.push($(this).attr('scope').split('-')[1] + '=' + this.value);
                         } else {
-                            search.push($(this).attr('id').split('-')[1] + '=' + this.value);
+                            search.push($(this).attr('scope').split('-')[1] + '=' + this.value);
                         }
                     } else {
-                        if (search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null) !== undefined) {
-                            search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('id').split('-')[1] + '=', 'i')) !== null)), 1);
+                        if (search.find(value => value.match(new RegExp($(this).attr('scope').split('-')[1] + '=', 'i')) !== null) !== undefined) {
+                            search.splice(search.indexOf(search.find(value => value.match(new RegExp($(this).attr('scope').split('-')[1] + '=', 'i')) !== null)), 1);
                         }
                     }
                 });

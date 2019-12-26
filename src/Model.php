@@ -17,7 +17,7 @@ class :Model extends Model
 
     protected $filterable = [
         'id', //FILTER
-        'rol' //FILTER EXAMPLE
+//        'rol' //FILTER EXAMPLE
     ];
 
     public function scopeId($query, $text)
@@ -35,25 +35,21 @@ class :Model extends Model
     {
         return [
             (Object)[
-                'field' => 'name', //NAME COLUMN TABLE
-                'label' => 'Nombre', //NAME OF FORM
-                'type' => 'text' //TEXT | SELECT
+                'field' => 'id', //NAME COLUMN TABLE
+                'label' => '#', //NAME OF TABLE
+                'filter' => true, //TRUE || FALSE
+                'filter_type' => 'text', //TEXT | SELECT
+                'filter_scope' => 'id', //FILTER SCOPE METHOD
+                'order' => 'id' //FIELD || EMPTY
             ],
             //EXAMPLE
 //            (Object)[
 //                'field' => 'rol',
 //                'label' => 'Rol',
 //                'type' => 'select',
-//                'items' => [ //ITEMS SELECT FORM
-//                    (Object)[
-//                        'label' => 'Administrador',
-//                        'value' => 1
-//                    ],
-//                    (Object)[
-//                        'label' => 'Usuario',
-//                        'value' => 2
-//                    ],
-//                ]
+//                'items' => Rol::all()->map(function($rol){
+////                    return (Object)['value' => $rol->id, 'label' => $rol->name];
+////                }),
 //            ],
         ];
     }
@@ -70,21 +66,15 @@ class :Model extends Model
             ],
             //EXAMPLE
 //            (Object)[
-//                'field' => 'role',
+//                'field' => 'role_id',
 //                'label' => 'Rol',
 //                'filter' => true,
 //                'filter_type' => 'select',
-//                'filter_items' => [ //ITEMS SELECT FILTER
-//                    (Object)[
-//                        'label' => 'Administrador',
-//                        'value' => 1
-//                    ],
-//                    (Object)[
-//                        'label' => 'Usuario',
-//                        'value' => 2
-//                    ],
-//                ],
-//                'order' => 'id'
+//                'filter_scope' => 'rol',
+//                'filter_items' => Rol::all()->map(function($rol){
+//                    return (Object)['value' => $rol->id, 'label' => $rol->name];
+//                }),
+//                'order' => 'role_id'
 //            ],
             (Object)[
                 'field' => 'actions',
