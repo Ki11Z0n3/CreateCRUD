@@ -1,3 +1,11 @@
+<!--
+* @package    javimanga/createcrud
+* @author     Javier Manga <javimanga93@gmail.com>
+* @copyright  2019-2019 The FreakSystem Group
+* @license    https://packagist.org/packages/javimanga/createcrud MIT
+* @link       https://packagist.org/packages/javimanga/createcrud
+* @link       https://github.com/Ki11Z0n3/CreateCRUD
+-->
 <template>
     <div class="">
         <table class="table table-bordered table-hover" width="100%" cellspacing="0">
