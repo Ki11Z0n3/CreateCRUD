@@ -8,34 +8,42 @@ use Validator;
 
 class :ModelController extends Controller
 {
+    protected static $relations = [];
+
     public function index(Request $request)
     {
-        $filters = $this->validate(request(), [
-            'id' => 'sometimes|string',
+        $filters = $this->validate(request(), [ //VALIDATE FILTERS
+            'id' => 'sometimes|string', //FILTER
+//            'rol' => 'sometimes|string', //FILTER EXAMPLE
         ]);
 
-        $:Model = $this->showAll();
-        $:Model->filter($filters);
+        $:Model = $this->showAll(); //METHOD GET DATA
+        $:Model->filter($filters); //METHOD FILTER
 
-        if (request()->wantsJson()) {
+        if (request()->wantsJson()) { //IF JSON RETURN DATA FILTER AND PAGINATION
             return $:Model->pagination($request);
         }
 
         $model = (Object)[
-            'component' => 'table-component',
-            'title' => '',
-            'subtitle' => '',
-            'tableBuilder' => :Model::tableBuilder(),
-            'prefix' => ':Model',
-            'model' => ':Model',
-            'relations' => (Object)[],
-            'data' => $:Model->paginate(10),
-            'filter_column' => '',
-            'filter_type' => 'DESC',
-            'new' => false,
-            'formEdit' => :Model::formEdit()
+            'title' => 'CRUD :Model', //TITLE CARD
+            'subtitle' => ':Model', //SUBTITLE CARD
+            'tableBuilder' => :Model::tableBuilder(), //METHOD BUILD TABLE
+            'formEdit' => :Model::formEdit(), //METHOD BUILD FORM EDIT/NEW
+            'prefix' => ':Model', //NAME PREFIX ROUTE
+            'data' => $:Model->paginate(10), //DATA BUILD TABLE
+            'filter_column' => 'id', //ORDER COLUMN TABLE
+            'filter_type' => 'DESC', //ORDER TABLE
         ];
-        return view(':Model.template')->with(compact('model'));
+        return view(':Model.template')->with(compact('model')); //RETURN VIEW BLADE
+    }
+
+    public function showAll($paginate = false)
+    {
+        if(!$paginate){
+            return :Model::with(:Model::$relations);
+        }else {
+            return :Model::with(:Model::$relations)->paginate(10);
+        }
     }
 
     public function store(Request $request)
@@ -61,15 +69,6 @@ class :ModelController extends Controller
     public function show(:Model $:Model)
     {
         abort(404);
-    }
-
-    public function showAll($paginate = false)
-    {
-        if(!$paginate){
-            return :Model::with([]);
-        }else {
-            return :Model::with([])->paginate(10);
-        }
     }
 
     public function update(Request $request, :Model $:Model)

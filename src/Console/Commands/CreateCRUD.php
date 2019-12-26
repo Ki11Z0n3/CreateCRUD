@@ -118,81 +118,158 @@ class CreateCRUD extends Command
     public function handle()
     {
         try {
+            //SI RECIBO PARÁMETRO
             if ($this->argument('table')) {
+
+                //NOMBRE DE TABLA PASADO POR PARÁMETRO
                 $table = $this->argument('table');
-                $camelCaseTable = ucwords($table, '_');
-                $camelCaseTable = str_ireplace('_', '', $camelCaseTable);
-                $camelCaseTable = $this->singularize($camelCaseTable);
+
+                //NOMBRE DE TABLA A CAMELCASE
+                $camelCaseTable = $this->nameToCamelCase(str_ireplace('_', '', ucwords($table, '_')));
+
+                //NOMBRE DE BASE DE DATOS DE ENV
                 $database = env('DB_DATABASE');
+
+                //SI EXISTE LA TRABLA
                 if (Schema::hasTable($table)) {
                     $appImport = [];
                     $appUse = [];
                     $appComponent = [];
+
+                    //SI NO EXISTE EL MODELO APP/"CAMELCASETABLE".PHP
                     if (file_exists("app/{$camelCaseTable}.php")) {
                         $copy = $this->anticipate("Ya existe el modelo {$camelCaseTable}.php, ¿desea sobreescribirlo? Si (recomendado) / No", ['si', 'no'], 'si');
                         if (mb_strtolower($copy) == 'si') {
+                            $this->info('Creando modelo');
                             exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/Model.php > app/{$camelCaseTable}.php");
                         }
                     } else {
+                        $this->info('Creando modelo');
                         exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/Model.php > app/{$camelCaseTable}.php");
                     }
+
+                    //SI NO EXISTE EL CONTROLADOR APP/HTTP/CONTROLLERS/"CAMELCASETABLE"CONTROLLER.PHP
                     if (file_exists("app/Http/Controllers/{$camelCaseTable}Controller.php")) {
                         $copy = $this->anticipate("Ya existe el controlador {$camelCaseTable}Controller.php, ¿desea sobreescribirlo? Si (recomendado) / No", ['si', 'no'], 'si');
                         if (mb_strtolower($copy) == 'si') {
+                            $this->info('Creando controlador');
                             exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
                         }
                     } else {
+                        $this->info('Creando controlador');
                         exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
                     }
+
+                    //SI NO EXISTE LA CARPETA APP/HTTP/TRAITS
                     if (!file_exists("app/Http/Traits")) {
+                        $this->info('Creando carpeta app/Http/Traits');
                         mkdir("app/Http/Traits", 0755, true);
                     }
+
+                    //SI NO EXISTE EL MODELO APP/HTTP/TRAITS/FILTERABLE.PHP
                     if (!file_exists("app/Http/Traits/Filterable.php")) {
+                        $this->info('Creando modelo app/Http/Traits/Filterable.php');
                         exec("cp vendor/javimanga/createcrud/src/Http/Traits/Filterable.php app/Http/Traits/Filterable.php");
                     }
+
+                    //SI NO EXISTE LA CARPETA RESOURCES/JS/COMPONENTS/DEFAULT
                     if (!file_exists("resources/js/components/default")) {
+                        $this->info('Creando carpeta resources/js/components/default');
                         mkdir("resources/js/components/default", 0755, true);
                     }
+
+                    //SI NO EXISTE EL COMPONENTE RESOURCES/JS/COMPONENTS/DEFAULT/TABLECOMPONENT.VUE
                     if (!file_exists("resources/js/components/default/TableComponent.vue")) {
+                        $this->info('Creando componente resources/js/components/default/TableComponent.vue');
                         exec("cp vendor/javimanga/createcrud/src/TableComponent.vue resources/js/components/default/TableComponent.vue");
                     }
+
+                    //SI NO EXISTE EL COMPONENTE RESOURCES/JS/COMPONENTS/DEFAULT/MODALCOMPONENT.VUE
                     if (!file_exists("resources/js/components/default/ModalComponent.vue")) {
+                        $this->info('Creando componente resources/js/components/default/ModalComponent.vue');
                         exec("cp vendor/javimanga/createcrud/src/ModalComponent.vue resources/js/components/default/ModalComponent.vue");
                     }
+
+                    //SI NO EXISTE EL COMPONENTE RESOURCES/JS/COMPONENTS/DEFAULT/SELECTFILTERCOMPONENT.VUE
+                    if (!file_exists("resources/js/components/default/SelectFilterComponent.vue")) {
+                        $this->info('Creando componente resources/js/components/default/SelectFilterComponent.vue');
+                        exec("cp vendor/javimanga/createcrud/src/SelectFilterComponent.vue resources/js/components/default/SelectFilterComponent.vue");
+                    }
+
+                    //SI NO EXISTE EL SCRIPT RESOURCES/JS/HELPERS.JS
                     if (!file_exists("resources/js/helpers.js")) {
+                        $this->info('Creando script resources/js/helpers.js');
                         exec("cp vendor/javimanga/createcrud/src/helpers.js resources/js/helpers.js");
                     }
+
+                    //SI NO EXISTE LA CARPETA RESOURCES/VIEWS/"CAMELCASETABLE"
                     if (!file_exists("resources/views/{$camelCaseTable}")) {
+                        $this->info("Creando carpeta resources/views/{$camelCaseTable}");
                         mkdir("resources/views/{$camelCaseTable}", 0755, true);
                     }
+
+                    //COPIAMOS LA VISTA BLADE EN RESOURCES/VIEWS/"CAMELCASETABLE"/TABLE.BLADE.PHP
+                    $this->info("Creando vista resources/views/{$camelCaseTable}/template.blade.php");
                     exec("cp vendor/javimanga/createcrud/src/template.blade.php resources/views/{$camelCaseTable}/template.blade.php");
+
+                    //BUSCAMOS SI EXISTE LA RUTA EN ROUTES/WEB.PHP
                     $contents = file_get_contents('routes/web.php');
                     $pattern = preg_quote("Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller');", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
+                        $this->info("Creando ruta");
                         exec("echo Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller'); >> routes/web.php");
                     }
+
+                    //BUSCAMOS SI EXISTE EL COMPONENTE VUESWEETALERT2 EN RESOURCES/JS/APP.JS
                     $contents = file_get_contents('resources/js/app.js');
                     $pattern = preg_quote("import VueSweetalert2 from 'vue-sweetalert2';", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
+                        $this->info("Instalando vue-sweetalert2");
                         exec('npm install -save vue-sweetalert2');
                         $appImport[] = "import VueSweetalert2 from 'vue-sweetalert2';";
                         $appImport[] = "import 'sweetalert2/dist/sweetalert2.min.css';";
                         $appUse[] = "Vue.use(VueSweetalert2);";
                     }
+
+                    //BUSCAMOS SI EXISTE EL COMPONENTE V-SELECT EN RESOURCES/JS/APP.JS
+                    $contents = file_get_contents('resources/js/app.js');
+                    $pattern = preg_quote("import VueSweetalert2 from 'vue-sweetalert2';", '/');
+                    $pattern = "/^.*$pattern.*\$/m";
+                    if (!preg_match_all($pattern, $contents, $matches)) {
+                        $this->info("Instalando vue-select");
+                        exec('npm install -save vue-select');
+                        $appImport[] = "import vSelect from 'vue-select';";
+                        $appImport[] = "import 'vue-select/dist/vue-select.css';";
+                        $appComponent[] = "Vue.component('v-select', vSelect);";
+                    }
+
+                    //BUSCAMOS SI EXISTE EL COMPONENTE TABLECOMPONENT EN RESOURCES/JS/APP.JS
                     $contents = file_get_contents('resources/js/app.js');
                     $pattern = preg_quote("Vue.component('table-component', require('./components/default/TableComponent.vue').default);", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
                         $appComponent[] = "Vue.component('table-component', require('./components/default/TableComponent.vue').default);";
                     }
+
+                    //BUSCAMOS SI EXISTE EL COMPONENTE MODALCOMPONENT EN RESOURCES/JS/APP.JS
                     $contents = file_get_contents('resources/js/app.js');
                     $pattern = preg_quote("Vue.component('modal-component', require('./components/default/ModalComponent.vue').default);", '/');
                     $pattern = "/^.*$pattern.*\$/m";
                     if (!preg_match_all($pattern, $contents, $matches)) {
                         $appComponent[] = "Vue.component('modal-component', require('./components/default/ModalComponent.vue').default);";
                     }
+
+                    //BUSCAMOS SI EXISTE EL COMPONENTE SELECTFILTERCOMPONENT EN RESOURCES/JS/APP.JS
+                    $contents = file_get_contents('resources/js/app.js');
+                    $pattern = preg_quote("Vue.component('select-filter-component', require('./components/default/SelectFilterComponent.vue').default);", '/');
+                    $pattern = "/^.*$pattern.*\$/m";
+                    if (!preg_match_all($pattern, $contents, $matches)) {
+                        $appComponent[] = "Vue.component('select-filter-component', require('./components/default/SelectFilterComponent.vue').default);";
+                    }
+
+                    //COMPROBAMOS SI HAY QUE AÑADIR LINEAS EN RESOURCES/JS/APP.JS
                     if (count($appImport) != 0 || count($appUse) != 0 || count($appComponent) != 0) {
                         $this->info('Añada las siguientes lineas a resources/js/app.js');
                         if (count($appImport) != 0) {
@@ -212,22 +289,37 @@ class CreateCRUD extends Command
                         }
                         $this->info('Después ejecute: npm run dev');
                     } else {
+
+                        //SI NO HAY QUE AÑADIR LINEAS A RESOURCES/JS/APP.JS SE EJECUTA NPM RUN DEV
+                        $this->info("Ejecutando npm run dev");
                         exec('npm run dev');
                     }
+
+                    //LIMPIAMOS CACHE DE CONFIGURACIÓN
+                    $this->info("Limpiando cache de configuración");
                     Artisan::call('config:cache');
-                    $this->info(url(route($camelCaseTable . '.index')));
+
+                    //MOSTRAMOS LA URL DEL CRUD EN EL TERMINAL
+                    $this->info("Acceda a la siguiente url: " . url(route($camelCaseTable . '.index')));
                 } else {
+
+                    //ERROR NO EXISTE LA TABLA
                     $this->error('Error: la tabla ' . $table . ' no existe');
                 }
             } else {
+
+                //ERROR NO SE HA ESCRITO PARÁMETRO
                 $this->error('Error: no se ha escrito la tabla');
             }
         } catch (\Exception $e) {
+
+            //ERROR CAPTURADO
             $this->error('Error: ' . $e->getMessage());
         }
     }
 
-    public function singularize($string)
+    //FUNCIÓN PARA CONVERTIR NOMBRE DE TABLA A CAMELCASE
+    public function nameToCamelCase($string)
     {
         if (in_array(strtolower($string), $this->uncountable))
             return $string;
@@ -243,7 +335,5 @@ class CreateCRUD extends Command
             if (preg_match($pattern, $string))
                 return preg_replace($pattern, $result, $string);
         }
-
-
     }
 }

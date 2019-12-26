@@ -16,7 +16,8 @@ class :Model extends Model
     protected $appends = [];
 
     protected $filterable = [
-        'id',
+        'id', //FILTER
+        'rol' //FILTER EXAMPLE
     ];
 
     public function scopeId($query, $text)
@@ -24,14 +25,36 @@ class :Model extends Model
         return $query->where('id', 'LIKE', '%' . $text . '%');
     }
 
+    //SCOPE EXAMPLE
+//    public function scopeRol($query, $text)
+//    {
+//        return $query->where('rol', 'LIKE', '%' . $text . '%');
+//    }
+
     public static function formEdit()
     {
         return [
             (Object)[
-                'field' => 'name',
-                'label' => 'Nombre',
-                'type' => 'text'
+                'field' => 'name', //NAME COLUMN TABLE
+                'label' => 'Nombre', //NAME OF FORM
+                'type' => 'text' //TEXT | SELECT
             ],
+            //EXAMPLE
+//            (Object)[
+//                'field' => 'rol',
+//                'label' => 'Rol',
+//                'type' => 'select',
+//                'items' => [ //ITEMS SELECT FORM
+//                    (Object)[
+//                        'label' => 'Administrador',
+//                        'value' => 1
+//                    ],
+//                    (Object)[
+//                        'label' => 'Usuario',
+//                        'value' => 2
+//                    ],
+//                ]
+//            ],
         ];
     }
 
@@ -39,12 +62,30 @@ class :Model extends Model
     {
         return [
             (Object)[
-                'field' => 'id',
-                'label' => '#',
-                'filter' => true,
-                'filter_type' => 'text',
-                'order' => 'id'
+                'field' => 'id', //NAME COLUMN TABLE
+                'label' => '#', //NAME OF TABLE
+                'filter' => true, //TRUE || FALSE
+                'filter_type' => 'text', //TEXT | SELECT
+                'order' => 'id' //FIELD || EMPTY
             ],
+            //EXAMPLE
+//            (Object)[
+//                'field' => 'role',
+//                'label' => 'Rol',
+//                'filter' => true,
+//                'filter_type' => 'select',
+//                'filter_items' => [ //ITEMS SELECT FILTER
+//                    (Object)[
+//                        'label' => 'Administrador',
+//                        'value' => 1
+//                    ],
+//                    (Object)[
+//                        'label' => 'Usuario',
+//                        'value' => 2
+//                    ],
+//                ],
+//                'order' => 'id'
+//            ],
             (Object)[
                 'field' => 'actions',
                 'label' => '',
