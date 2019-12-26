@@ -91,7 +91,7 @@ class CreateCRUD extends Command
      *
      * @var string
      */
-    protected $signature = 'create:crud {table}';
+    protected $signature = 'create:crud {table} {--r}';
 
     /**
      * The console command description.
@@ -160,6 +160,37 @@ class CreateCRUD extends Command
                         exec("sed 's/:Model/{$camelCaseTable}/g' vendor/javimanga/createcrud/src/ModelController.php > app/Http/Controllers/{$camelCaseTable}Controller.php");
                     }
 
+                    //SI NO EXISTE LA CARPETA RESOURCES/VIEWS/"CAMELCASETABLE"
+                    if (!file_exists("resources/views/{$camelCaseTable}")) {
+                        $this->info("Creando carpeta resources/views/{$camelCaseTable}");
+                        mkdir("resources/views/{$camelCaseTable}", 0755, true);
+                    }
+
+                    //COPIAMOS LA VISTA BLADE EN RESOURCES/VIEWS/"CAMELCASETABLE"/TABLE.BLADE.PHP
+                    $this->info("Creando vista resources/views/{$camelCaseTable}/template.blade.php");
+                    exec("cp vendor/javimanga/createcrud/src/template.blade.php resources/views/{$camelCaseTable}/template.blade.php");
+
+                    //SI EXISTE PARÁMETRO MODO REDUCIDO SOLO CREAMOS MODELO Y CONTROLADOR
+                    if($this->option('r')){
+
+                        //BUSCAMOS SI EXISTE LA RUTA EN ROUTES/WEB.PHP
+                        $contents = file_get_contents('routes/web.php');
+                        $pattern = preg_quote("Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller');", '/');
+                        $pattern = "/^.*$pattern.*\$/m";
+                        if (!preg_match_all($pattern, $contents, $matches)) {
+                            $this->info("Creando ruta");
+                            exec("echo Route::resource('{$camelCaseTable}', '{$camelCaseTable}Controller'); >> routes/web.php");
+                        }
+
+                        //LIMPIAMOS CACHE DE CONFIGURACIÓN
+                        $this->info("Limpiando cache de configuración");
+                        Artisan::call('config:cache');
+
+                        //MOSTRAMOS LA URL DEL CRUD EN EL TERMINAL
+                        $this->info("Acceda a la siguiente url: " . url(route($camelCaseTable . '.index')));
+                        return false;
+                    }
+
                     //SI NO EXISTE LA CARPETA APP/HTTP/TRAITS
                     if (!file_exists("app/Http/Traits")) {
                         $this->info('Creando carpeta app/Http/Traits');
@@ -201,16 +232,6 @@ class CreateCRUD extends Command
                         $this->info('Creando script resources/js/helpers.js');
                         exec("cp vendor/javimanga/createcrud/src/helpers.js resources/js/helpers.js");
                     }
-
-                    //SI NO EXISTE LA CARPETA RESOURCES/VIEWS/"CAMELCASETABLE"
-                    if (!file_exists("resources/views/{$camelCaseTable}")) {
-                        $this->info("Creando carpeta resources/views/{$camelCaseTable}");
-                        mkdir("resources/views/{$camelCaseTable}", 0755, true);
-                    }
-
-                    //COPIAMOS LA VISTA BLADE EN RESOURCES/VIEWS/"CAMELCASETABLE"/TABLE.BLADE.PHP
-                    $this->info("Creando vista resources/views/{$camelCaseTable}/template.blade.php");
-                    exec("cp vendor/javimanga/createcrud/src/template.blade.php resources/views/{$camelCaseTable}/template.blade.php");
 
                     //BUSCAMOS SI EXISTE LA RUTA EN ROUTES/WEB.PHP
                     $contents = file_get_contents('routes/web.php');
