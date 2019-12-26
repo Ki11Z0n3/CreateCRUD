@@ -21,15 +21,15 @@
                         <template v-if="value.type == 'select'">
                             <label>{{value.label}}</label>
                             <select :name="value.field" class="form-control">
-                                <option v-if="!data[value.field] || data[value.field] == ''" selected disabled>Seleccione</option>
+                                <option v-if="!data[value.field] || data[value.field] == ''" selected disabled>{{value.placeholder ? value.placeholder : 'Seleccione'}}</option>
                                 <option :selected="data[value.field] == item.value" :value="item.value" v-for="(item, indexItem) in value.items">{{item.label}}</option>
                             </select>
-<!--                            <v-select :options="value.items" :value="data[value.field]" @input="setSelected(data[value.field])"/>-->
-<!--                            <input type="hidden" :name="value.field" :value="data[value.field]" />-->
+                            <!--                            <v-select :options="value.items" :value="data[value.field]" @input="setSelected(data[value.field])"/>-->
+                            <!--                            <input type="hidden" :name="value.field" :value="data[value.field]" />-->
                         </template>
                         <template v-else>
                             <label>{{value.label}}</label>
-                            <input :type="value.type" class="form-control" :name="value.field" :value="data[value.field]">
+                            <input :type="value.type" class="form-control" :name="value.field" :value="data[value.field]" :placeholder="value.placeholder ? value.placeholder : 'Escriba aquí'">
                         </template>
                     </div>
                 </form>

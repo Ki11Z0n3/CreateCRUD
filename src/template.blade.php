@@ -25,7 +25,7 @@
 </head>
 <body>
 @routes
-<div id="app">
+<div id="app" class="container">
     <!-- Page Heading -->
     <h1 class="h3 mb-2 text-gray-800">{{$model->title}}</h1>
 

@@ -31,7 +31,7 @@ class :Model extends Model
 
     public function scopeId($query, $text)
     {
-        return $query->where('id', 'LIKE', '%' . $text . '%');
+        return $query->where('id', $text);
     }
 
     //SCOPE EXAMPLE
@@ -45,11 +45,9 @@ class :Model extends Model
         return [
             (Object)[
                 'field' => 'id', //NAME COLUMN TABLE
-                'label' => '#', //NAME OF TABLE
-                'filter' => true, //TRUE || FALSE
-                'filter_type' => 'text', //TEXT | SELECT
-                'filter_scope' => 'id', //FILTER SCOPE METHOD
-                'order' => 'id' //FIELD || EMPTY
+                'label' => '#', //NAME OF FORM
+                'type' => 'text', //TEXT | SELECT
+                'placeholder' => 'Escriba aquí' //TEXT VIEW USER FORM
             ],
             //EXAMPLE
 //            (Object)[
