@@ -69,6 +69,7 @@ class :Model extends Model
                 'label' => '#', //NAME OF TABLE
                 'filter' => true, //TRUE || FALSE
                 'filter_type' => 'text', //TEXT | SELECT
+                'filter_scope' => 'id', //TEXT | SELECT
                 'order' => 'id' //FIELD || EMPTY
             ],
             //EXAMPLE

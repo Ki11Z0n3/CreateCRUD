@@ -24,7 +24,7 @@ use PDOException;
 
 class CreateCRUD extends Command
 {
-    public $plural = array(
+    public $plural = [
         '/(quiz)$/i' => "$1zes",
         '/^(ox)$/i' => "$1en",
         '/([m|l])ouse$/i' => "$1ice",
@@ -44,9 +44,9 @@ class CreateCRUD extends Command
         '/(us)$/i' => "$1es",
         '/s$/i' => "s",
         '/$/' => "s"
-    );
+    ];
 
-    public $singular = array(
+    public $singular = [
         '/(quiz)zes$/i' => "$1",
         '/(matr)ices$/i' => "$1ix",
         '/(vert|ind)ices$/i' => "$1ex",
@@ -75,9 +75,9 @@ class CreateCRUD extends Command
         '/(corpse)s$/i' => "$1",
         '/(us)es$/i' => "$1",
         '/s$/i' => ""
-    );
+    ];
 
-    public $irregular = array(
+    public $irregular = [
         'move' => 'moves',
         'foot' => 'feet',
         'goose' => 'geese',
@@ -86,9 +86,9 @@ class CreateCRUD extends Command
         'man' => 'men',
         'tooth' => 'teeth',
         'person' => 'people'
-    );
+    ];
 
-    public $uncountable = array(
+    public $uncountable = [
         'sheep',
         'fish',
         'deer',
@@ -98,7 +98,7 @@ class CreateCRUD extends Command
         'rice',
         'information',
         'equipment'
-    );
+    ];
     /**
      * The name and signature of the console command.
      *
